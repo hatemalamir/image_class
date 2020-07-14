@@ -1,6 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css'
+import React from "react";
+import Webcam from "react-webcam";
+import ReactDOM from "react-dom";
+import "./index.css";
 
 class App extends React.Component {
   constructor(props) {
@@ -12,9 +13,11 @@ class App extends React.Component {
     };
   }
 
+  WebcamComponent = () => <Webcam />;
+
   componentDidMount() {
     fetch("http://localhost:5000/api/v1.0/test")
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(
         (result) => {
           this.setState({
@@ -28,31 +31,16 @@ class App extends React.Component {
             error,
           });
         }
-      )
+      );
   }
 
   render() {
-    const {error, isLoaded, items} = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
-      return <div>Loading...</div>;
-    } else {
-      return (
-        <ul>
-          {items.map(item => (
-            <li key={item.name}>
-              {item.name} {item.price}
-            </li>
-          ))}
-        </ul>
-      );
-    }
+    return (
+      <>
+        Hello
+      </>
+    );
   }
 }
 
-
-ReactDOM.render(
-  <App/>,
-  document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById("root"));
