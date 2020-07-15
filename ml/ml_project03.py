@@ -31,12 +31,12 @@ import matplotlib.pyplot as plt
 ## Configuration Parameters
 """
 
-img_width = 197
-img_height = 197
+img_width = 299
+img_height = 299
 
 batch_size = 120
 
-base_path = '/content/drive/My Drive/Colab_Notebooks/data/monkey/'
+base_path = '../data'
 
 train_path = base_path + 'training-data/training'
 validation_path = base_path + 'validation-data/validation'
