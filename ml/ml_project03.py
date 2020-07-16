@@ -13,6 +13,10 @@ Original file is located at
 !nvidia-smi
 
 # Commented out IPython magic to ensure Python compatibility.
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+# warnings.filterwarnings('ignore')
+
 import os.path
 
 from keras import Model, optimizers
@@ -23,6 +27,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from IPython.display import SVG
 from keras.utils.vis_utils import model_to_dot
 
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 # %matplotlib inline
 
@@ -31,12 +36,12 @@ import matplotlib.pyplot as plt
 ## Configuration Parameters
 """
 
-img_width = 197
-img_height = 197
+img_width = 299
+img_height = 299
 
-batch_size = 120
+batch_size = 128
 
-base_path = '/content/drive/My Drive/Colab_Notebooks/data/monkey/'
+base_path = '../data'
 
 train_path = base_path + 'training-data/training'
 validation_path = base_path + 'validation-data/validation'
@@ -55,36 +60,47 @@ print("Number of samples in Validation dataset:", validation_samples)
 """## Data augmentation"""
 
 train_datagen = ImageDataGenerator(
-    rotation_range=30,
-    width_shift_range=0.3,
-    height_shift_range=0.2,
-    rescale=1.0 / 255,
-    shear_range=0.3,
-    zoom_range=0.3,
-    horizontal_flip=True,
-    vertical_flip=False,
+    rotation_range = 30,
+    width_shift_range = 0.3,
+    height_shift_range = 0.2,
+    rescale = 1.0 / 255,
+    shear_range = 0.3,
+    zoom_range = 0.3,
+    horizontal_flip = True,
+    vertical_flip = False,
 )
 
-validation_datagen = ImageDataGenerator(rescale=1.0 / 255)
+validation_datagen = ImageDataGenerator(rescale = 1.0 / 255)
 
 train_generator = train_datagen.flow_from_directory(
     train_path,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='categorical',
+    target_size = (img_width, img_height),
+    batch_size = batch_size,
+    class_mode = 'categorical',
 )
 
 validation_generator = validation_datagen.flow_from_directory(
     validation_path,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='categorical',
+    target_size = (img_width, img_height),
+    batch_size = batch_size,
+    class_mode = 'categorical',
 )
 
 """# Model
 
-## Main functions
+## Importing the pre-trained model
 """
+
+# Import the Xception model to use as the base for our model
+xception_base = xception.Xception(
+    include_top = False,
+    weights = 'imagenet',
+    input_shape = (img_width, img_height, 3)
+)
+
+xception_base.summary()
+
+"""## Transfer learning"""
 
 # Adds new top to base model
 def add_top(base):
@@ -99,7 +115,7 @@ def add_top(base):
     # Output layer
     predictions = Dense(nb_classes, activation='softmax')(x)
 
-    return Model(input=base.input, output=predictions)
+    return Model(inputs = base.input, outputs = predictions)
 
 # Sets up model for transfer learning
 def setup_model(model, base):
@@ -108,53 +124,13 @@ def setup_model(model, base):
         layer.trainable = False
 
     model.compile(
-        loss='categorical_crossentropy',
-        optimizer='rmsprop',
-        metrics=['accuracy']
+        loss = 'categorical_crossentropy',
+        optimizer = 'rmsprop',
+        metrics = ['accuracy']
     )
 
-"""## Importing the pre-trained model"""
-
-# Import the Xception model to use as the base for our model
-xception_base = xception.Xception(
-    include_top=False,
-    weights='imagenet',
-    input_shape=(img_width, img_height, 3)
-)
-
-xception_base.summary()
-
-"""## Transfer learning"""
-
-model = add_top(xception_base)
-setup_model(model, xception_base)
-
-"""# Training
-
-## Parameters
-"""
-
-epochs = 10
-
-"""## Train the new layers"""
-
-# Train our new top layer
-history1 = model.fit_generator(
-    train_generator,
-    steps_per_epoch = training_samples // batch_size,
-    epochs = epochs,
-    validation_data= validation_generator,
-    validation_steps = validation_samples // batch_size,
-    verbose = 1,
-)
-
-"""# Fine Tune
-
-## Main functions
-"""
-
-# Setup model for fine tuning
-def setup_model(model, trainable):
+# Fine tune the model
+def fine_tune(model, trainable):
     # Freeze the un-trainable layers of the model base
     for layer in model.layers[:(len(model.layers) - trainable)]:
         layer.trainable = False
@@ -163,53 +139,112 @@ def setup_model(model, trainable):
         layer.trainable = True
 
     model.compile(
-        loss='categorical_crossentropy',
-        # Slower training rate for fine-tuning
-        optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-        metrics=['accuracy']
+        loss = 'categorical_crossentropy',
+        optimizer = optimizers.SGD(lr = 1e-4, momentum = 0.9),
+        metrics = ['accuracy']
     )
 
-"""## Parameters"""
+# appending our trainable layers to the end of the model
+model = add_top(xception_base)
 
-epochs_ft = 10
+"""## Training
 
-"""## Training"""
+We are using a hybrid approach, at first we train with RMSprop/Adam until we get a better initial state for SGD optimizer, then we start the training again with SGD.
 
-# Setup model to retrain our top layer plus block 13 and 14 of Xception
-setup_model(model, 19)
+Training the layers we added while freezing all the original model layers.
+"""
 
-# Fine-tune the model
+# setup the model
+setup_model(model, xception_base)
+
+epochs = 20
+
+# train the model
+history1 = model.fit_generator(
+    train_generator,
+    steps_per_epoch = training_samples // batch_size,
+    epochs = epochs,
+    validation_data = validation_generator,
+    validation_steps = validation_samples // batch_size,
+    verbose = 1,
+)
+
+"""## Fine-tuning
+
+Re-train the model again using the weights we got from the first training for our new added layers, and in the same time we will un-freeze the last two layers of the original model.
+"""
+
+# fine tune the model to retrain our top layer plus blocks 13 and 14 of Xception
+fine_tune(model, 19)
+
+epochs_ft = 20
+
+# train the model
 history2 = model.fit_generator(
     train_generator,
     steps_per_epoch = training_samples // batch_size,
     epochs = epochs_ft,
     validation_data = validation_generator,
     validation_steps = validation_samples // batch_size,
-    verbose=1,
+    verbose = 1,
 )
 
-"""# Diagrams"""
+"""# Diagrams
+
+## Model Diagrams
+"""
 
 SVG(model_to_dot(model, show_shapes = False, show_layer_names=True, rankdir='HB', dpi = 72).create(prog='dot', format='svg'))
 
 model.summary()
 
+"""## Learning Curves"""
+
 fig, ax = plt.subplots(1, 2, figsize = (14, 5))
 
-history = history2
+ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
+ax[1].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-ax[0].plot(history.history["loss"])
-ax[0].plot(history.history["val_loss"])
+loss = history1.history["loss"] + history2.history["loss"]
+val_loss = history1.history["val_loss"] + history2.history["val_loss"]
+accuracy = history1.history["accuracy"] + history2.history["accuracy"]
+val_accuracy = history1.history["val_accuracy"] + history2.history["val_accuracy"]
+
+ax[0].plot(loss)
+ax[0].plot(val_loss)
 ax[0].set_title("model loss")
 ax[0].set_ylabel("loss")
 ax[0].set_xlabel("epoch")
 ax[0].legend(["train", "test"], loc="upper left")
 
-ax[1].plot(history.history["accuracy"])
-ax[1].plot(history.history["val_accuracy"])
+ax[1].plot(accuracy)
+ax[1].plot(val_accuracy)
 ax[1].set_title("model accuracy")
 ax[1].set_ylabel("accuracy")
 ax[1].set_xlabel("epoch")
 ax[1].legend(["train", "test"], loc="upper left")
 
 plt.show()
+
+"""The momentum is big, that is why there is some overshooting in the model loss graph for the SGD part, also SGD tind to do these spikes because of the mini batches usage. For the first part, it is because we are doing a transfer learning.
+
+If we had like 3000 epochs, our graph will smooth over and spikes won't be that noticable.
+
+From the graph, we can see that more epochs will help in getting more accuracy, our model doesn't overfit, and there is no underfit.
+
+# References
+* https://colab.research.google.com/github/nipunbatra/blog/blob/master/_notebooks/2017-12-29-neural-collaborative-filtering.ipynb#scrollTo=t23DgPbMQFng
+* https://www.kaggle.com/slothkong/10-monkey-species?select=monkey_labels.txt
+* https://keras.io/api/applications/
+* https://www.kaggle.com/voandy/transfer-learning-fine-tuning-xception-98-7-acc
+* https://github.com/zaid478/Transfer-Learning-from-Xception-Model-in-Keras-/blob/master/transfer_learn.py
+* https://medium.com/@vigneshgig/xception-neural-network-transfer-learning-and-data-processing-using-ai-c3e7a4ea7bf2
+* https://www.kaggle.com/abnera/transfer-learning-keras-xception-cnn
+* https://arxiv.org/abs/1610.02357
+* https://towardsdatascience.com/review-xception-with-depthwise-separable-convolution-better-than-inception-v3-image-dc967dd42568
+* https://towardsdatascience.com/a-basic-introduction-to-separable-convolutions-b99ec3102728
+* https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c
+* https://shaoanlu.wordpress.com/2017/05/29/sgd-all-which-one-is-the-best-optimizer-dogs-vs-cats-toy-experiment/
+* https://keras.io/guides/transfer_learning/
+* https://stats.stackexchange.com/questions/303857/explanation-of-spikes-in-training-loss-vs-iterations-with-adam-optimizer
+"""
