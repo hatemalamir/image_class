@@ -70,8 +70,11 @@ train = split_data[0]
 valid = split_data[1]
 test = split_data[2]
  
-shutil.rmtree(PATH + '/exports')
+print("Number of train samples: ", len(train))
+print("Number of valid samples: ", len(valid)) 
+print("Number of test samples: ", len(test)) 
 
+shutil.rmtree(PATH + '/exports')
 os.mkdir(PATH + '/exports')
 os.mkdir(PATH + '/exports/train')
 os.mkdir(PATH + '/exports/test')
@@ -79,13 +82,23 @@ os.mkdir(PATH + '/exports/valid')
 
 # set working directory
 
+for i in range(0, 10):
+    os.mkdir("%s/exports/train/n%d" % (PATH, i))
+    os.mkdir("%s/exports/test/n%d" % (PATH, i))
+    os.mkdir("%s/exports/valid/n%d" % (PATH, i))
+i = 0
 def export_data(data, name):
-    for i in range(0, 10):
-        os.mkdir(PATH + '/exports/' + name + '/n' + str(i))
+    i = 0
     for index, item in data.iterrows():
-        dest = "%s/exports/%s/n%d" % (PATH, name, item['label'])
-        shutil.copy(item['image'], dest)        
+        i = i + 1
+        dest = "%s/exports/%s/n%d/%s_%d" % (PATH, name, item['label'], name, i)
+        shutil.copyfile(item['image'], dest)        
+    return i
 
-export_data(train, 'train')  
-export_data(valid, 'valid')  
-export_data(test, 'test')  
+i = i + export_data(train, 'train')  
+i = i + export_data(valid, 'valid')  
+i = i + export_data(test, 'test')
+
+print("Original: " + str(len(train) + len(test) + len(valid)))
+cpt = sum([len(files) for r, d, files in os.walk(PATH + "/exports")])
+print(cpt)
