@@ -1,4 +1,5 @@
 import React, {useCallback,useState,useEffect} from 'react'
+import { Slide } from 'react-slideshow-image';
 import axios from 'axios'
 import {useDropzone} from 'react-dropzone'
 import SVGUpload from '../SVGUpload'
@@ -6,9 +7,18 @@ import MonkeyCard from '../MonkeyCard'
 
 import "./Upload.scss"
 
+import 'react-slideshow-image/dist/styles.css'
+
 export default function Upload() {
   const [images, setImages]= useState([])
   const [loading, setLoading]= useState(false)
+  const [classImg,setClassImg] = useState([])
+
+  const onClassifier = () =>{
+    images.map((obj)=>{
+        console.log(obj)
+    })
+  }
 
   const onDrop = useCallback((acceptedFiles) => {
     const filesURL = []
@@ -38,8 +48,8 @@ export default function Upload() {
         }).catch(function (error) {
             console.log(error);
         });
-        console.log(rsult)
-        filesURL.push({"original":urlFi,"cam":rsult,"class":"Test_class"})
+        console.log()
+        filesURL.push({"original":urlFi, "file":file})
         // setImages(filesURL)
       }
       //console.log(file)
@@ -71,7 +81,13 @@ console.log(images)
       <p>Drag 'n' drop some files here, or click to select files</p>
     </div>
     {loading && <p>LOADING</p>}
-    {images.length > 0 && images.map((src)=>(<MonkeyCard url={src.original}/>))}
+    {images.length > 0 && (<div>
+        <ul>
+          {images.map((src)=>(<li>{src.file.name}</li>))}
+        </ul>
+        <button onClick={onClassifier}>CLASSIFIER</button>
+      </div>)}
+    /*{images.length > 0 && images.map((src)=>(<MonkeyCard url={src.original}/>))}*/
     </>
   )
 }
