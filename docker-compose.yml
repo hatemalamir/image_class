@@ -6,6 +6,8 @@ services:
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
       - ./api:/backend
+      - ./ml:/ml
+      - ./cam:/cam/
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py

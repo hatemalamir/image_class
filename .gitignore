@@ -1,6 +1,8 @@
 # Ignore React production build
 client/build
 
+ml/monkey
+
 # Ignore pycache
 api/__pycache__
 

@@ -1,0 +1,18 @@
+.Upload{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    //color: #f1f1f1;
+    //text-color:#f1f1f1;
+    &_slide{
+      display: flex;
+      img{
+        width: 200px;
+        height: 200px
+      }
+    }
+
+  svg {
+        fill: grey;
+    }
+}

@@ -5,3 +5,4 @@ COPY requirements.txt /backend/requirements.txt
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 COPY . .
+RUN echo "Done"

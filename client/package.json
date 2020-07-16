@@ -3,9 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "axios": "^0.19.2",
+    "node-sass": "^4.14.1",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
+    "react-dropzone": "^11.0.2",
+    "react-images-upload": "^1.2.8",
+    "react-images-uploading": "^2.2.1",
     "react-scripts": "2.1.5",
+    "react-slideshow-image": "^2.0.2",
     "react-webcam": "^5.2.0"
   },
   "scripts": {
