@@ -1,7 +1,11 @@
 import React from "react";
 import Webcam from "react-webcam";
 import ReactDOM from "react-dom";
-import "./index.css";
+import MonkeyCard from "./components/MonkeyCard"
+import ImageUpload from "./components/uploads/ImageUpload"
+import Upload from "./components/uploads/Upload"
+import "./index.scss";
+
 
 class App extends React.Component {
   constructor(props) {
@@ -16,29 +20,14 @@ class App extends React.Component {
   WebcamComponent = () => <Webcam />;
 
   componentDidMount() {
-    fetch("http://localhost:5000/api/v1.0/test")
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            isLoaded: true,
-            items: result.items,
-          });
-        },
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error,
-          });
-        }
-      );
+
   }
 
   render() {
     return (
-      <>
-        Hello
-      </>
+      <div className="App">
+        <Upload  />
+      </div>
     );
   }
 }
