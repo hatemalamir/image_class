@@ -29,7 +29,7 @@ export default function Upload() {
       // Do whatever you want with the file contents
         const urlFi = reader.result
         const classifiedImg = ""
-        const rsult = axios.post('http://localhost:5000/api/class',{"url": urlFi})
+        const rsult = axios.post('http://localhost:5000/api/class',{"url": urlFi,"name":file.name })
         .then((req)=>{
           console.log(req)
             classifiedImg = req.data

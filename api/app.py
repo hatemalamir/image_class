@@ -19,6 +19,7 @@ def classifier():
     req = request.json
     # print(req)
     img_path =req["url"]
+    img_name = req['name']
     # print(img_path)
     model = Xception(weights='imagenet')
     last_conv_layer_name = 'block14_sepconv2_act'
