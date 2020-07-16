@@ -17,16 +17,14 @@ session = InteractiveSession(config=config)
 def grad_cam(img_path, size, model, last_conv_layer_name, classifier_layer_names):
     img_arr = get_img_array(img_path, size)
     heatmap = make_gradcam_heatmap(img_arr, model, last_conv_layer_name, classifier_layer_names)
-    with urlopen(img_path) as url:
-        orig_img_arr = img_to_array(load_img(BytesIO(url.read()), target_size=size))
+    orig_img_arr = img_to_array(load_img(img_path, target_size=size))
     superimposed_image = create_superimposed_image(orig_img_arr, heatmap)
     return superimposed_image
 
 
 def get_img_array(img_path, size):
     # `img` is a PIL image of the specified size
-    with urlopen(img_path) as url:
-        img = load_img(BytesIO(url.read()), target_size=size)
+    img = load_img(img_path, target_size=size)
     # `img_arr` is a float32 Numpy array of shape (size_w, size_h, 3)
     img_arr = img_to_array(img)
     # add a dimension to transform our array into a "batch" of size (1, size_w, size_h, 3)
