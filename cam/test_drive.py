@@ -1,8 +1,6 @@
 from IPython.display import Image
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img
-from tensorflow.keras.applications.xception import Xception
 
 from cam.grad_cam import grad_cam
 %matplotlib inline
