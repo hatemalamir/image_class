@@ -35,21 +35,16 @@ export default function Upload() {
 
       reader.onabort = () => console.log('file reading was aborted')
       reader.onerror = () => console.log('file reading has failed')
-      reader.onload = () => {
+
+      reader.onload = async () => {
       // Do whatever you want with the file contents
         const urlFi = reader.result
-        const classifiedImg = ""
-        const rsult = axios.post('http://localhost:5000/api/class',{"url": urlFi,"name":file.name })
-        .then((req)=>{
-          console.log(req)
-            classifiedImg = req.data
-            const {data} = req
-            return data
-        }).catch(function (error) {
-            console.log(error);
-        });
-        console.log()
-        filesURL.push({"original":urlFi, "file":file})
+        const classifiedImg = []
+        const rsult = await axios.post('http://localhost:5000/api/class',{"url": urlFi,"name":file.name })
+        console.log(classifiedImg)
+        console.log(rsult)
+        const classImg = "data:image/jpeg;base64," + rsult.data
+        filesURL.push({"original":urlFi, "file":file,"classified":classImg,"label":"test"})
         // setImages(filesURL)
       }
       //console.log(file)
@@ -81,13 +76,8 @@ console.log(images)
       <p>Drag 'n' drop some files here, or click to select files</p>
     </div>
     {loading && <p>LOADING</p>}
-    {images.length > 0 && (<div>
-        <ul>
-          {images.map((src)=>(<li>{src.file.name}</li>))}
-        </ul>
-        <button onClick={onClassifier}>CLASSIFIER</button>
-      </div>)}
-    /*{images.length > 0 && images.map((src)=>(<MonkeyCard url={src.original}/>))}*/
+    {images.length > 0 && (<Slide>{images.map((src)=>(<div className="Upload_slide"><div><img src={src.original}/></div><div><img src={src.classified}/></div></div>))}</Slide>)}
+
     </>
   )
 }
