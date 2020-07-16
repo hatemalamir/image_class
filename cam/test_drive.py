@@ -1,7 +1,6 @@
 from IPython.display import Image
 import matplotlib.pyplot as plt
-from tensorflow.keras.preprocessing.image import load_img
-from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.models import load_model
 
 from cam.grad_cam import grad_cam
 %matplotlib inline
@@ -24,3 +23,6 @@ print(type(superimposed_img))
 superimposed_img.save(SAVE_PATH)
 display(Image(SAVE_PATH))
 #
+
+str = 'str1,str2'
+str.split(',')[-1]

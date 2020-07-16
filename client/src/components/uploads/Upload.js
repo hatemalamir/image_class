@@ -41,10 +41,11 @@ export default function Upload() {
         const urlFi = reader.result
         const classifiedImg = []
         const rsult = await axios.post('http://localhost:5000/api/class',{"url": urlFi,"name":file.name })
-        console.log(classifiedImg)
+        console.log(rsult.headers.name)
+        console.log("++++++++++++++++++++++respone")
         console.log(rsult)
         const classImg = "data:image/jpeg;base64," + rsult.data
-        filesURL.push({"original":urlFi, "file":file,"classified":classImg,"label":"test"})
+        filesURL.push({"original":urlFi, "file":file,"classified":classImg,"label":rsult.headers.name})
         // setImages(filesURL)
       }
       //console.log(file)
@@ -76,7 +77,7 @@ console.log(images)
       <p>Drag 'n' drop some files here, or click to select files</p>
     </div>
     {loading && <p>LOADING</p>}
-    {images.length > 0 && (<Slide>{images.map((src)=>(<div className="Upload_slide"><div><img src={src.original}/></div><div><img src={src.classified}/></div></div>))}</Slide>)}
+    {images.length > 0 && (<Slide>{images.map((src)=>(<div className="Upload_slide"><div><img src={src.original}/></div><div><img src={src.classified}/></div><h3>{src.label}</h3> </div>))}</Slide>)}
 
     </>
   )

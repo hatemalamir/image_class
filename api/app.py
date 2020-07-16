@@ -4,22 +4,30 @@ from io import BytesIO
 from flask import Flask, jsonify, make_response, send_file, request
 from flask_cors import CORS, cross_origin
 from grad_cam import grad_cam
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from tensorflow.keras.preprocessing.image import load_img
-from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.models import load_model
 
-TEMP_IMG_NAME = '/backend/received_img.jpg'
 IMG_SIZE = (299, 299)
+MODEL_PATH='xception_model_ft.h5'
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 #app.config['CORS_HEADERS'] = 'Content-Type'
 
-# print(img_path)
-model = Xception(weights='imagenet')
+model = load_model(MODEL_PATH)
 last_conv_layer_name = 'block14_sepconv2_act'
-classifier_layer_names = ["avg_pool", "predictions", ]
+classifier_layer_names = ["global_average_pooling2d_1", "dense_1", "dense_2"]
 
+monkey_labels = {
+    0: "Mantled Howler",
+    1: "Patas Monkey",
+    2: "Bald Uakari",
+    3: "Japanese Macaque",
+    4: "Pygmy Marmoset",
+    5: "White-headed Capuchin",
+    6: "Silvery Marmoset",
+    7: "Common Squirrel Monkey",
+    8: "Black-headed Night Monkey",
+    9: "Nilgiri Langur",
+}
 
 @app.route('/api/class', methods=['POST'])
 @cross_origin(origin='*')
@@ -33,7 +41,9 @@ def classifier():
     TEMP_IMG_NAME = "/backend/" + img_name
     with open(TEMP_IMG_NAME, 'wb') as f:
         f.write(img_data)
-    img = grad_cam(TEMP_IMG_NAME, IMG_SIZE, model, last_conv_layer_name, classifier_layer_names)
+    img, top_pred_index = grad_cam(TEMP_IMG_NAME, IMG_SIZE, model, last_conv_layer_name, classifier_layer_names)
+    monkey_name = monkey_labels[top_pred_index]
+    print("++++++++++++++++++++Name api "+monkey_name)
     classifiedImg = img_name + '_classified.jpeg'
     img.save(classifiedImg)
     print("====================reading classified img=======================")
@@ -42,6 +52,8 @@ def classifier():
     classImg_str = base64.b64encode(buffered.getvalue())
     response = make_response()
     response.data = classImg_str
+    response.headers['Access-Control-Expose-Headers']= "name"
+    response.headers['name'] = monkey_name
     return response
 
     # img2 = img

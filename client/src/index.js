@@ -19,9 +19,7 @@ class App extends React.Component {
 
   WebcamComponent = () => <Webcam />;
 
-  componentDidMount() {
-
-  }
+  componentDidMount() {}
 
   render() {
     return (
