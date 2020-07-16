@@ -30,7 +30,7 @@ def classifier():
     img_str = req["url"]
     img_name = req['name']
     img_data = base64.b64decode(img_str.split(',')[-1])
-    TEMP_IMG_NAME = "/backend/" + img_name + "jpg"
+    TEMP_IMG_NAME = "/backend/" + img_name
     with open(TEMP_IMG_NAME, 'wb') as f:
         f.write(img_data)
     img = grad_cam(TEMP_IMG_NAME, IMG_SIZE, model, last_conv_layer_name, classifier_layer_names)
