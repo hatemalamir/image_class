@@ -1,7 +1,19 @@
-# React + Flask Development Boilerplate
+# Image Classification
+### Deep Learning, Xception CNN, Transfer Learning, CAM, Flask, and Docker
 
 ## Overview
-Extremely lightweight development environment for a web application
+As we know, not all monkeys as the same! In this project, we're helping confusd humans to
+differentiate between 10 monkey species, namely, "Mantled Howler", "Patas Monkey", "Bald Uakari", "Japanese Macaque", "Pygmy Marmoset", "White-headed Capuchin", "Silvery Marmoset", "Common Squirrel Monkey", "Black-headed Night Monkey", and "Nilgiri Langur".
+
+## Approach
+We used the Xception Convolutional Neural Network architecture, transfered the weights fitted on ImageNet, retrained some of the final
+layers, and used the CAM technique to verify the network efficiency.
+We made a handy dandy web application as our UI. You just load one or more images, and you'll get the name of the most similar monkey
+to the image.
+Try it out! It's fun!
+
+## If you really want to try it out, you need to know the following
+We used an extremely lightweight development environment for a web application
 running a [React](https://reactjs.org/) front-end and 
 [Flask](http://flask.pocoo.org/) API back-end. The 
 front-end connects to the back-end by making HTTP requests for
@@ -66,11 +78,6 @@ Finally, to gracefully stop running our local servers, you can run
     docker-compose down
 
 in a separate terminal window or press __control + C__.
-
-
-## Future plans
-* Add boilerplate for running tests locally and through continuous integration.
-* Add boilerplate for configuring production-ready settings and deployment.
 
 
 ## License
